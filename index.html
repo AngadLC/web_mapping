@@ -181,7 +181,7 @@ function onAccuratePositionError (e) {
 			var message = 'Most accurate position found (Accuracy: ' + e.accuracy + ')';
 			addStatus(message, 'done');
 			map.setView(e.latlng, 12);
-			L.marker(e.latlng).addTo(map).bindPopup('You are here');
+			L.marker(e.latlng).addTo(map).bindPopup('You are here').openPopup();
 		}
 
 		function addStatus (message, className) {
