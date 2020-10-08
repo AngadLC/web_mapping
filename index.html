@@ -50,6 +50,12 @@
     <!-- adding butostrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- adding css -->
+    <link rel="stylesheet" href="./leaflet-measure.css">
+    <!-- adding measure leaflet -->
+    <script src="./leaflet-measure.js"></script>
+    <!-- adding print -->
+    <script src="./leaflet.browser.print.min.js"></script>
     <style>
         #map {
             width: 80%;
@@ -254,14 +260,41 @@
     navigator.geolocation.getCurrentPosition(function(position){
         console.log(position.coords.latitude, position.coords.longitude)
         L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
-        map.setView([position.coords.latitude, position.coords.longitude])
+        
+        map.setView([position.coords.latitude, position.coords.longitude], 17)
     });
     
   } else {
     console.log("Geolocation is not supported by this browser.");
   }
-            }, 100);
-        })     
+            }, 5000);
+        })    
+        
+         // Adding Measure Tool
+var measureControl = new L.Control.Measure({
+  primaryLengthUnit: 'kilometers',
+  secondaryLengthUnit: 'miles',
+  primaryAreaUnit:'sqmeters',
+  secondaryAreaUnit: 'acres',
+  activeColor: "#ed3833",
+  completedColor: "#63aabc"
+});
+measureControl.addTo(map);
+// Print Option script
+L.control.browserPrint({
+  title: "Print current Layer",
+  documentTitle: "Map",
+  printModes: [
+    L.control.browserPrint.mode.landscape("Tabloid VIEW", "Tabloid"),
+    L.control.browserPrint.mode.landscape(),
+    "PORTrait",
+    L.control.browserPrint.mode.auto("Auto", "B4"),
+    L.control.browserPrint.mode.custom("Selected area", "B5"),
+  ],
+  manualMode: !1,
+  closePopupsOnPrint: !0,
+}).addTo(map);
+
     </script>
 
 </body>
