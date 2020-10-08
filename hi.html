@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokhara hospital</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+   <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+  <img src="./" alt="" srcset="">
+   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+   <style>
+   #mapid { 
+       margin-top:50px;
+       height: 380px; }
+   </style>
+ <script src="../dist/leaflet.customsearchbox.min.js"></script>
+<link href="../dist/searchbox.min.css" rel="stylesheet" />
+<link href="https://google.github.io/material-design-icons/">
+<link href="../dist/searchbox.css" rel="stylesheet" />
+<script
+   src="https://code.jquery.com/jquery-3.5.1.js"
+   integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+   crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
+   <script src="/js/leaflet-0.7.2/leaflet.ajax.min.js"></script>
+</head>
+<link rel="stylesheet" href="./leaflet-control-osm-geocoder-master/Control.OSMGeocoder.css">
+<script src="./leaflet-control-osm-geocoder-master/Control.OSMGeocoder.js"></script>
+<body>
+
+    <div id="mapid"></div>
+    <script >
+       var map = L.map('mapid').setView([28.2096, 83.9856], 11);
+       L.control.autolayers(config).addTo(map);
+       var config = {
+        overlays: overlays, //custom overlays group that are static
+        baseLayers: baseLayers, //custom baselayers group that are static
+        selectedBasemap: 'Streets', //selected basemap when it loads
+        selectedOverlays: ["ASTER Digital Elevation Model 30M", "ASTER Digital Elevation Model Color 30M", "Cities"], //which overlays should be on by default
+        mapServers: [{
+            "url": "http://services.arcgisonline.com/arcgis/rest/services",
+            "dictionary": "http://services.arcgisonline.com/arcgis/rest/services?f=pjson",
+            "tileUrl": "/MapServer/tile/{z}/{y}/{x}",
+            "name": "ArcGIS Online",
+            "type": "esri",
+            "baseLayers": ["ESRI_Imagery_World_2D", "ESRI_StreetMap_World_2D", "NGS_Topo_US_2D"],
+            "whitelist": ["ESRI_Imagery_World_2D", "ESRI_StreetMap_World_2D", "NGS_Topo_US_2D"]
+        }, {
+            "url": "http://geoint.nrlssc.navy.mil/nrltileserver",
+            "dictionary": "http://geoint.nrlssc.navy.mil/nrltileserver/wms?REQUEST=GetCapabilities&VERSION=1.1.1&SERVICE=WMS",
+            "tileUrl": "/{z}/{x}/{y}.png",
+            "name": "Navy NRL",
+            "type": "nrltileserver",
+            "baseLayers": ["bluemarble", "Landsat7", "DTED0_GRID_COLOR1", "ETOPO1_COLOR1", "NAIP", "DRG_AUTO"],
+            "blacklist": ["BlackMarble"]
+        }]
+    };
+
+    </script>
+    <script>
+     /* var map = L.map('mapid').setView([28.2096, 83.9856], 11);
+      L.tileLayer('https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=gAWMvq9FjPXEk2IN9TQf',{
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
+        attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+        crossOrigin: true
+      }).addTo(map);*/
+      var searchctrl = L.control.fuseSearch();
+      searchctrl.addTo(map);
+      var district_boundary = new L.geoJson();
+district_boundary.addTo(map);
+
+$.ajax({
+dataType: "json",
+url: "pokharahospital.geojson",
+success: function(data) {
+    $(data.features).each(function(key, data) {
+        district_boundary.addData(data);
+    });
+}
+}).error(function() {});
+      </script>
