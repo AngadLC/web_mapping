@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Simple leaflet map</title>
+    <!-- adding butostrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- leaflet css -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
@@ -39,7 +42,12 @@
     <!-- adding accurate position -->
     <link rel="stylesheet" href="./Leaflet.AccuratePosition-master/example/style.css">
     <script src="./Leaflet.AccuratePosition.js"></script>
-
+    <!-- adding atm json -->
+    <script src="./atm11.json"></script>
+    <!-- adding leaflet.filelayer to upload the gpx, kml and geojson file to map to visulize the map -->
+    <script src="./Leaflet.FileLayer-master/src/leaflet.filelayer.js"></script>
+    <!-- adding the css for the file layer -->
+    <link rel="stylesheet" href="./Leaflet.FileLayer-master/docs/style.css">
     <!-- add css for to caontain the map -->
     <style>
         #map {
@@ -47,13 +55,26 @@
             height: 400px;
             margin: 40px auto;
         }
+
+        #status {
+            width: 80%;
+            height: 100px;
+            margin: 20px auto;
+        }
+        button{
+            width: 25%;
+            margin: auto;
+        }
     </style>
 </head>
 
 <body>
     <!-- create the id to place the map -->
     <div id="map"></div>
+    <!-- try to add the button which geoloacte the userlocation -->
+    <button id="tryme" class="btn  btn-success">track your location</button>
     <!-- //accurate location -->
+
     <ul id="status" class="progressing">
         <li>Find accurate position .. (desired accuracy:20)</li>
     </ul>
@@ -82,7 +103,7 @@
         map.on('click', onMapClick);
 
 
-        var cluster = L.markerClusterGroup();
+
 
         //adding geojson file
         var geojson = L.geoJson(dataview, {
@@ -92,18 +113,30 @@
             },
 
             onEachFeature: function (feature, layer) {
-                var popupText = 'geometry type: ' + feature.geometry.type;
+
+                layer.bindPopup(feature.properties.tags.name)
 
                 if (feature.properties.color) {
                     popupText += '<br/>color: ' + feature.properties.color;
                 }
 
-                layer.bindPopup(popupText);
+
             }
         });
+        //adding atms
+        var geojson_atm = L.geoJson(atm, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(feature.properties.tags.name)
+            }
 
+        })
+        var atmcluster = L.markerClusterGroup();
+        atmcluster.addLayer(geojson_atm);
         var markers = L.markerClusterGroup();
         markers.addLayer(geojson);
+
+
+
         // lets add bunch of the marker at once add add using layer group
         var lakeside = L.marker([28.2154, 83.9453]).bindPopup("<h2>Fewa Lake</h2>");
         begans = L.marker([28.1739, 84.0973]).bindPopup("<h2>Begns Tal</h2>");
@@ -144,7 +177,8 @@
 
         var overlayMaps = {
             "tourism": tourism,
-            "hospital": markers
+            "hospital": markers,
+            "atm": atmcluster
 
         };
 
@@ -172,8 +206,7 @@
         }
 
         function onAccuratePositionFound(e) {
-            console.log(e.accuracy);
-            console.log(e.latlng);
+
             var message = 'Progressing .. (accuracy :' + e.accuracy + ')';
             addStatus(message, 'progressing')
         }
@@ -191,7 +224,9 @@
             var message = 'Most accurate position found (Accuracy: ' + e.accuracy + ')';
             addStatus(message, 'done');
             map.setView(e.latlng, 12);
-            L.marker(e.latlng).addTo(map).bindPopup('You are here').openPopup();
+            L.marker((e.latlng), {
+
+            }).addTo(map).bindPopup('You are here').openPopup();
         }
 
         function addStatus(message, className) {
@@ -211,8 +246,21 @@
             desiredAccuracy: 20
         });
 
-
-
+        // try to track the user location using the javascript
+        $('#tryme').click(function () {
+            setInterval(() => {
+                if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position){
+        console.log(position.coords.latitude, position.coords.longitude)
+        L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
+        map.setView([position.coords.latitude, position.coords.longitude])
+    });
+    
+  } else {
+    console.log("Geolocation is not supported by this browser.");
+  }
+            }, 100);
+        })     
     </script>
 
 </body>
