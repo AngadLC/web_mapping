@@ -34,7 +34,10 @@
 <link rel="stylesheet" href="./Leaflet.MousePosition-master/src/L.Control.MousePosition.css">
 <script src="./Leaflet.MousePosition-master/src/L.Control.MousePosition.js"></script>
 <!-- getting user location -->
-<script src="./easy-button.js"></script>
+<!-- adding accurate position -->
+<link rel="stylesheet" href="./Leaflet.AccuratePosition-master/example/style.css">
+<script src="./Leaflet.AccuratePosition.js"></script>
+
  <!-- add css for to caontain the map -->
  <style>
      
@@ -49,6 +52,10 @@
 <body>
     <!-- create the id to place the map -->
     <div id="map"></div>
+    <!-- //accurate location -->
+<ul id="status" class="progressing">
+    <li>Find accurate position .. (desired accuracy:20)</li>
+</ul>
     <script>
         // lets the cordinate where map will be display
         var map = L.map('map').setView([28.2096,83.9856],12);
@@ -147,37 +154,56 @@ L.control.mousePosition({
     position:'bottomleft'
 }).addTo(map);
 //adding user location
-// User Location script
-function userLocation() {
-  if (navigator.geolocation) {
-      if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(displayLocationInfo);
-          }
-          function displayLocationInfo(position) {
-          const lng = position.coords.longitude;
-          const lat = position.coords.latitude;
 
-          L.circle([lat, lng], {
-            radius: 1000,
-            opacity: 1,
-            weight:1,
-            fillopactity: 1,
-            fillColor: 'blue'
-          })
-          .addTo(map)
-          .bindPopup(`longitude: ${ lng } | latitude: ${ lat }`).openPopup();
-          map.setView([lat,lng],12);
-      }
-  } else {
-      console.log('You dont have geolocation');
-  }
-};
-// User Location Button
-L.easyButton('fa-crosshairs fa-lg', function(){
-    userLocation();
-},'Get Your Location').addTo(map);
+//accurate position
+function onAccuratePositionProgress (e) {
+    
+    addStatus(e.message,'error')
+}
 
+function onAccuratePositionFound (e) {
+    console.log(e.accuracy);
+    console.log(e.latlng);
+    var message = 'Progressing .. (accuracy :'+e.accuracy + ')';
+    addStatus(message,'progressing')
+}
+
+function onAccuratePositionError (e) {
+			addStatus(e.message, 'error');
+		}
+
+		function onAccuratePositionProgress (e) {
+			var message = 'Progressing … (Accuracy: ' + e.accuracy + ')';
+			addStatus(message, 'progressing');
+		}
+
+		function onAccuratePositionFound (e) {
+			var message = 'Most accurate position found (Accuracy: ' + e.accuracy + ')';
+			addStatus(message, 'done');
+			map.setView(e.latlng, 12);
+			L.marker(e.latlng).addTo(map).bindPopup('You are here');
+		}
+
+		function addStatus (message, className) {
+			var ul = document.getElementById('status'),
+				li = document.createElement('li');
+			li.appendChild(document.createTextNode(message));
+			ul.className = className;
+			ul.appendChild(li);
+		}
+
+		map.on('accuratepositionprogress', onAccuratePositionProgress);
+		map.on('accuratepositionfound', onAccuratePositionFound);
+		map.on('accuratepositionerror', onAccuratePositionError);
+
+		map.findAccuratePosition({
+			maxWait: 10000,
+			desiredAccuracy: 20
+        });
+        
+
+        
     </script>
-<h1>hello i have commit</h1>
+
 </body>
 </html>

@@ -4,61 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <!-- leaflet css -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
    crossorigin=""/>
-   <!-- Make sure you put this AFTER Leaflet's CSS -->
+   <!-- leaflet.js -->
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-   crossorigin=""></script>
-   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
-   <style>
-   #mapid { 
-       margin-top:50px;
-       height: 380px; }
-   </style>
-   <script
-   src="https://code.jquery.com/jquery-3.5.1.js"
-   integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
-   crossorigin="anonymous"></script>
-   <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
+ integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+ crossorigin=""></script>
+ <!-- font aswsome cdn -->
+ <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
+ <!-- marker plugin to change -->
+ <link rel="stylesheet" href="./leaflet.awesome-markers.css">
+ <script src="./leaflet.awesome-markers.js"></script>
+ <!-- add the geojson file -->
+ <script src="./pokharahospital.js"></script>
+ <!-- adding the jquery -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js" type="text/javascript"></script>
+
+<!-- cluster -->
+<link rel="stylesheet" href="./Leaflet.markercluster-master/dist/MarkerCluster.css">
+<link rel="stylesheet" href="./Leaflet.markercluster-master/dist/MarkerCluster.Default.css">
+<script src="./Leaflet.markercluster-1.4.1/dist/leaflet.markercluster.js"></script>
+
+<!-- After Leaflet script -->
+<script src="https://unpkg.com/leaflet.featuregroup.subgroup@1.0.2/dist/leaflet.featuregroup.subgroup.js"></script>
+<!-- adding mouse coordinate -->
+<link rel="stylesheet" href="./Leaflet.MousePosition-master/src/L.Control.MousePosition.css">
+<script src="./Leaflet.MousePosition-master/src/L.Control.MousePosition.js"></script>
+<!-- getting user location -->
+<script src="./easy-button.js"></script>
+ <!-- add css for to caontain the map -->
+ <style>
+     
+     #map{
+         width: 80%;
+         height: 400px;
+         margin: 40px auto;
+     }
+     
+ </style>
 </head>
 <body>
-    <div id="mapid"></div>
-    <input type="text" name="" id="search">
+    <!-- create the id to place the map -->
+    <div id="map"></div>
     <script>
-      var map = L.map('mapid').setView([28.2096, 83.9856], 11);
-      L.tileLayer('https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=gAWMvq9FjPXEk2IN9TQf',{
+        // lets the cordinate where map will be display
+        var map = L.map('map').setView([28.2096,83.9856],12);
+        //lets add the tile layers
+        L.tileLayer('https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=gAWMvq9FjPXEk2IN9TQf',{
         tileSize: 512,
         zoomOffset: -1,
         minZoom: 1,
         attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
         crossOrigin: true
       }).addTo(map);
-     
-      </script>
-      <script>
-          $(document).ready(function(){
-              $('#search').keyup(function(){
-                  var seachvalue= ($('#search').val()).trim();
-                 console.log(seachvalue);
-                 if(seachvalue != ''){
-                     $.getJSON('./pokharahospital.json', function(result){
-                         var list = result;
-                         console.log(list);
-                         var options = {
-                             shouldSort:true,
-                             threshold:0.6,
-                             location:0,
-                             distance:100,
-                             keys: [
-                                 
-                             ]
-                         }
-                     })
-                 }
-              })
+      //add the marker 
+      var marker = L.marker([28.2096,83.9856]).addTo(map).bindPopup("<h1>Pokhara</h1>");
+      //showing the location of the click
+      var popup = L.popup();
+      function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent("You clicked the map at " + e.latlng.toString())
+        .openOn(map);
+}
+      
+map.on('click', onMapClick);
+
+
+var cluster = L.markerClusterGroup();
+
+//adding geojson file
+var geo = L.geoJSON(dataview, {
+        onEachFeature:function(feature, layer){
+            layer.bindPopup(feature.properties.tags.name)
+        }
+       
+      }
+        
+      )   
+
+   
+// lets add bunch of the marker at once add add using layer group
+var lakeside = L.marker([28.2154,83.9453]).bindPopup("<h2>Fewa Lake</h2>");
+    begans = L.marker([28.1739, 84.0973]).bindPopup("<h2>Begns Tal</h2>");
+    peacepogada = L.marker([27.4989, 83.2763]).bindPopup("<h2>Peace Pogada</h2>");
+    //insted of adding them to the map directly use the layer group method
+    var tourism = L.layerGroup([lakeside,begans,peacepogada]);
+    tourism.addTo(map)
+    // add the switch layer
+    var hybridView =L.tileLayer('https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=gAWMvq9FjPXEk2IN9TQf',{
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
+        attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+        crossOrigin: true
+      }),
+      googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+    googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+    osmmap = L.tileLayer('https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=gAWMvq9FjPXEk2IN9TQf',{
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
+        attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+        crossOrigin: true
+      })
+//lets create an object which store the base maps and stores to it
+var baseMaps = {
+    "hybridView": hybridView,
+    "googlestreets": googleStreets,
+    "googleSat":googleSat,
+    "osmmap":osmmap
+};
+
+var overlayMaps = {
+    "tourism": tourism,
+    "hospital":geo
+    
+};
+
+//add the layer control option
+L.control.layers(baseMaps, overlayMaps).addTo(map);
+//adding cluster function
+
+
+//add the scale in map
+L.control.scale({
+    metric:true,
+    position:'bottomright'
+}).addTo(map);
+
+// adding mouse coordinate
+L.control.mousePosition({
+    position:'bottomleft'
+}).addTo(map);
+//adding user location
+// User Location script
+function userLocation() {
+  if (navigator.geolocation) {
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(displayLocationInfo);
+          }
+          function displayLocationInfo(position) {
+          const lng = position.coords.longitude;
+          const lat = position.coords.latitude;
+
+          L.circle([lat, lng], {
+            radius: 1000,
+            opacity: 1,
+            weight:1,
+            fillopactity: 1,
+            fillColor: 'blue'
           })
-      </script>
+          .addTo(map)
+          .bindPopup(`longitude: ${ lng } | latitude: ${ lat }`).openPopup();
+          map.setView([lat,lng],12);
+      }
+  } else {
+      console.log('You dont have geolocation');
+  }
+};
+// User Location Button
+L.easyButton('fa-crosshairs fa-lg', function(){
+    userLocation();
+},'Get Your Location').addTo(map);
+
+    </script>
+<h1>hello i have commit</h1>
 </body>
 </html>
