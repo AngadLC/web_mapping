@@ -33,7 +33,8 @@
 <!-- adding mouse coordinate -->
 <link rel="stylesheet" href="./Leaflet.MousePosition-master/src/L.Control.MousePosition.css">
 <script src="./Leaflet.MousePosition-master/src/L.Control.MousePosition.js"></script>
-
+<!-- getting user location -->
+<script src="./easy-button.js"></script>
  <!-- add css for to caontain the map -->
  <style>
      
@@ -84,8 +85,7 @@ var geo = L.geoJSON(dataview, {
       }
         
       )   
- geo.addTo(cluster);
- cluster.addTo(map)
+
    
 // lets add bunch of the marker at once add add using layer group
 var lakeside = L.marker([28.2154,83.9453]).bindPopup("<h2>Fewa Lake</h2>");
@@ -135,11 +135,7 @@ var overlayMaps = {
 L.control.layers(baseMaps, overlayMaps).addTo(map);
 //adding cluster function
 
-    
-if (overlayMaps.hospital = true){
-overlayMaps.hospital.addTo(cluster);
-cluster.addTo(map)
-}
+
 //add the scale in map
 L.control.scale({
     metric:true,
@@ -150,6 +146,36 @@ L.control.scale({
 L.control.mousePosition({
     position:'bottomleft'
 }).addTo(map);
+//adding user location
+// User Location script
+function userLocation() {
+  if (navigator.geolocation) {
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(displayLocationInfo);
+          }
+          function displayLocationInfo(position) {
+          const lng = position.coords.longitude;
+          const lat = position.coords.latitude;
+
+          L.circle([lat, lng], {
+            radius: 1000,
+            opacity: 1,
+            weight:1,
+            fillopactity: 1,
+            fillColor: 'blue'
+          })
+          .addTo(map)
+          .bindPopup(`longitude: ${ lng } | latitude: ${ lat }`).openPopup();
+          map.setView([lat,lng],12);
+      }
+  } else {
+      console.log('You dont have geolocation');
+  }
+};
+// User Location Button
+L.easyButton('fa-crosshairs fa-lg', function(){
+    userLocation();
+},'Get Your Location').addTo(map);
 
     </script>
 </body>
